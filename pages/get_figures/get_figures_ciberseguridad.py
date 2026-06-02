@@ -80,6 +80,102 @@ def _get_cyber_df():
     return cross
 
 
+def fig_fraud_idde_scatter_cyber():
+    """Scatter: IDDE 2025 vs fraud rate by state, with a fitted trend line."""
+    df = _get_cyber_df()
+    idde_col = 'indice_de_desarrollo_digital_estatal_2025'
+    y_col = 'fraude_rate_100k'
+    needed = ['estado', idde_col, y_col]
+
+    if any(c not in df.columns for c in needed):
+        return go.Figure()
+
+    sub = df[needed].dropna().copy()
+    if len(sub) < 10:
+        return go.Figure()
+
+    sub['label'] = sub['estado'].map(_abbrev).fillna(sub['estado'])
+    x = sub[idde_col].to_numpy(dtype=float)
+    y = sub[y_col].to_numpy(dtype=float)
+    r = float(np.corrcoef(x, y)[0, 1])
+    slope, intercept = np.polyfit(x, y, 1)
+    xi = np.linspace(float(x.min()), float(x.max()), 80)
+    yi = slope * xi + intercept
+
+    fraud_norm = (y - y.min()) / (y.max() - y.min() + 1e-9)
+    point_colors = [
+        f'rgba({int(0 + t * 207)}, {int(180 - t * 170)}, {int(204 - t * 160)}, 0.92)'
+        for t in fraud_norm
+    ]
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=xi,
+        y=yi,
+        mode='lines',
+        line=dict(color=C_RED, width=2.2, dash='dash'),
+        hoverinfo='skip',
+        showlegend=False,
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=x,
+        y=y,
+        mode='markers+text',
+        text=sub['label'],
+        textposition='top center',
+        textfont=dict(size=8, color='rgba(232,232,240,0.72)'),
+        marker=dict(
+            color=point_colors,
+            size=10,
+            opacity=0.95,
+            line=dict(color='rgba(255,255,255,0.18)', width=1),
+        ),
+        hovertemplate=(
+            '<b>%{text}</b><br>'
+            'IDDE 2025: %{x:.1f}<br>'
+            'Fraude: %{y:.1f} por 100k hab.<extra></extra>'
+        ),
+        showlegend=False,
+    ))
+
+    fig.add_annotation(
+        xref='paper',
+        yref='paper',
+        x=0.02,
+        y=0.96,
+        text=f'<b>r = {r:+.2f}</b><br>31 estados con datos completos',
+        showarrow=False,
+        align='left',
+        bgcolor='rgba(207,10,44,0.14)',
+        bordercolor=C_RED,
+        borderwidth=1,
+        font=dict(size=10, color=C_TEXT),
+    )
+
+    fig.update_layout(
+        **_BASE,
+        margin=dict(l=64, r=28, t=24, b=58),
+        xaxis=dict(
+            title=dict(text='IDDE 2025', font=dict(size=11)),
+            showgrid=True,
+            gridcolor='rgba(255,255,255,0.05)',
+            color=C_MUTED,
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title=dict(text='Tasa de fraude por 100k habitantes', font=dict(size=11)),
+            showgrid=True,
+            gridcolor='rgba(255,255,255,0.05)',
+            color=C_MUTED,
+            zeroline=False,
+        ),
+        showlegend=False,
+    )
+    return fig
+
+
 def fig_fraud_quadrant():
     """EXP-08 — 2×2 quadrant: digital financial exposure vs cybersecurity capacity.
     Dot color = fraud rate. Critical gap = high exposure, low protection (bottom-right)."""

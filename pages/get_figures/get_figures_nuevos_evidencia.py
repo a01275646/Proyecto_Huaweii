@@ -458,7 +458,8 @@ def fig_fraude_idde_scatter():
     if idde_col not in cross.columns or y_col not in cross.columns:
         return go.Figure()
 
-    sub = cross[['estado', idde_col, y_col, 'cluster_label', 'cluster_color']].dropna()
+    optional_cols = [c for c in ['cluster_label', 'cluster_color'] if c in cross.columns]
+    sub = cross[['estado', idde_col, y_col] + optional_cols].dropna()
     if len(sub) < 10:
         return go.Figure()
 

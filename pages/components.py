@@ -14,6 +14,7 @@ _SECTION_ITEMS = {
     'estrategia': [
         ('07  Oportunidad',      '/slide_inversion'),
         ('08  Tu Estado',        '/slide_perfil_estado'),
+        ('11  Conclusiones',     '/slide_cta'),
     ],
 }
 
@@ -29,6 +30,7 @@ _PATH_TO_SECTION = {
     '/slide_7': 'evidencia',      '/slide_economia': 'evidencia',
     '/slide_ciberseguridad': 'evidencia',
     '/slide_inversion': 'estrategia', '/slide_perfil_estado': 'estrategia',
+    '/slide_cta': 'estrategia',
 }
 
 

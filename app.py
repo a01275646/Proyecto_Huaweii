@@ -1,5 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
+import os
 
 external_stylesheets = [
     dbc.themes.CYBORG,
@@ -14,6 +15,7 @@ app = dash.Dash(
 
 app.title = 'Dashboard_huawei_test'
 app.layout = dash.page_container
+server = app.server
 
 def _pretrain():
     import time
@@ -39,4 +41,10 @@ def _pretrain():
 if __name__ == "__main__":
     import threading
     threading.Thread(target=_pretrain, daemon=True).start()
-    app.run(debug=True, dev_tools_ui=False, use_reloader=False)
+    app.run(
+        host='0.0.0.0',
+        port=int(os.environ.get('PORT', 8050)),
+        debug=False,
+        dev_tools_ui=False,
+        use_reloader=False,
+    )

@@ -6,7 +6,7 @@ dash.register_page(__name__, path='/')
 SECTIONS = [
     {
         'key': 'diagnostico', 'icon': '◈', 'label': 'DIAGNÓSTICO',
-        'num': '01 – 03', 'tagline': 'El territorio: ¿qué está pasando y dónde?',
+        'num': '01 – 03', 'tagline': 'Mapa base: crimen, territorio y señales digitales',
         'color': '#00b4cc', 'glow': 'rgba(0,180,204,0.22)',
         'bg': 'rgba(0,180,204,0.04)', 'border': 'rgba(0,180,204,0.25)',
         'slides': [
@@ -26,7 +26,7 @@ SECTIONS = [
     },
     {
         'key': 'evidencia', 'icon': '◎', 'label': 'EVIDENCIA',
-        'num': '04 – 06', 'tagline': 'Por qué la infraestructura digital importa',
+        'num': '04 – 06', 'tagline': 'Relaciones entre digitalización, economía y seguridad',
         'color': '#c9922a', 'glow': 'rgba(201,146,42,0.22)',
         'bg': 'rgba(201,146,42,0.04)', 'border': 'rgba(201,146,42,0.25)',
         'slides': [
@@ -46,7 +46,7 @@ SECTIONS = [
     },
     {
         'key': 'estrategia', 'icon': '⬡', 'label': 'ESTRATEGIA',
-        'num': '07 – 08', 'tagline': 'Dónde y cómo invertir por perfil de estado',
+        'num': '07 – 11', 'tagline': 'Perfiles, riesgos y conclusiones para decidir',
         'color': '#00b87a', 'glow': 'rgba(0,184,122,0.22)',
         'bg': 'rgba(0,184,122,0.04)', 'border': 'rgba(0,184,122,0.25)',
         'slides': [
@@ -58,6 +58,10 @@ SECTIONS = [
              'title': 'Diagnóstico ejecutivo por estado',
              'desc': 'Selecciona tu estado: cluster, IDDE, brecha y retorno proyectado de inversión digital',
              'href': '/slide_perfil_estado'},
+            {'num': 11, 'label': 'Conclusiones',
+             'title': 'Resumen ejecutivo del análisis',
+             'desc': 'Salarios, percepción, confianza social y protección digital en una lectura integrada',
+             'href': '/slide_cta'},
         ],
     },
 ]
@@ -152,17 +156,17 @@ layout = html.Div(
                 html.Div(
                     className='intro-hero-text animate-pop',
                     children=[
-                        html.P('Diagnóstico de Inversión · México 2025',
+                        html.P('Dashboard Analítico · México 2025',
                                className='intro-eyebrow'),
                         html.H1(
-                            ['Infraestructura Digital', html.Br(),
-                             'como Motor de Desarrollo'],
+                            ['Digitalización, Seguridad', html.Br(),
+                             'y Desarrollo Económico'],
                             className='intro-titulo',
                         ),
                         html.P(
-                            'La evidencia muestra que la brecha digital es la mayor '
-                            'oportunidad de inversión en México — con retornos medibles '
-                            'en salarios, percepción ciudadana y ciberseguridad.',
+                            'Este dashboard analiza cómo la infraestructura digital se relaciona '
+                            'con incidencia delictiva, fraude, salarios, percepción de seguridad '
+                            'y confianza social en los estados de México.',
                             className='intro-subtitulo',
                         ),
                     ],
