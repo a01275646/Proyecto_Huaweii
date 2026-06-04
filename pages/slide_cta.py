@@ -6,237 +6,422 @@ from pages.components import sidebar
 dash.register_page(__name__, path='/slide_cta')
 
 
-def _step_card(num, title, subtitle, bullets, color, cls, delay=''):
-    bullet_items = [
-        html.Li(b, style={'fontSize': '11.5px', 'color': '#b8b8cc',
-                          'lineHeight': '1.6', 'marginBottom': '4px'})
-        for b in bullets
-    ]
-    return dbc.Card([
-        dbc.CardBody([
-            html.Div([
-                html.Span(num, style={
-                    'fontFamily': 'DM Mono, monospace',
-                    'fontSize': '28px', 'fontWeight': '800', 'color': color,
-                    'opacity': '0.25', 'marginRight': '12px', 'lineHeight': '1',
-                }),
-                html.Div([
-                    html.P(title, style={
-                        'fontWeight': '700', 'fontSize': '13px', 'color': color,
-                        'textTransform': 'uppercase', 'letterSpacing': '0.07em',
-                        'margin': '0 0 2px',
-                    }),
-                    html.P(subtitle, style={
-                        'fontSize': '11px', 'color': '#5c5c74', 'margin': '0',
-                    }),
-                ]),
-            ], style={'display': 'flex', 'alignItems': 'flex-start', 'marginBottom': '12px'}),
-            html.Ul(bullet_items, style={'paddingLeft': '16px', 'margin': '0'}),
-        ], style={'padding': '20px 22px'}),
-    ], className=f'animate-in h-100 {cls} {delay}'.strip())
+_VALUE_METRICS = [
+    {
+        'value': 'R²=0.59',
+        'label': 'Digitalización → Salarios',
+        'color': '#00b87a',
+        'class': 'card-success',
+    },
+    {
+        'value': 'R²=0.45',
+        'label': 'Digitalización → Percepción de seguridad',
+        'color': '#00b4cc',
+        'class': 'card-cyan',
+    },
+    {
+        'value': 'r=+0.78',
+        'label': 'Digitalización → Confianza social',
+        'color': '#c9922a',
+        'class': 'card-gold',
+    },
+]
+
+_CONCLUSIONS = [
+    (
+        '01',
+        'Crecimiento económico',
+        'Los estados más digitalizados presentan mejores salarios y mayor inclusión financiera.',
+        'La hoja de economía muestra R²=0.594 entre banca digital y salarios. Además, el análisis de rezagos indica que el efecto más fuerte aparece dos años después de invertir.',
+        '#00b87a',
+    ),
+    (
+        '02',
+        'Capital social',
+        'La confianza ciudadana aumenta conforme mejora la infraestructura digital.',
+        'La hoja de percepción encuentra R²≈0.445 entre IDDE y seguridad percibida, y el análisis de confianza reporta r=+0.78 entre cobertura digital y confianza social.',
+        '#00b4cc',
+    ),
+    (
+        '03',
+        'Retorno sostenible',
+        'La consistencia en la inversión importa más que el gasto puntual.',
+        'El resultado de inversión sostenida compara estados que mejoran IDDE de forma consistente: ahí aparecen retornos salariales mayores que en aumentos aislados.',
+        '#c9922a',
+    ),
+]
+
+_METHOD_STEPS = [
+    (
+        'Datos cruzados',
+        'Se integran IDDE, ENOE, ENVIPE, incidencia delictiva, DENUE y variables económicas por estado.',
+        '#00b4cc',
+    ),
+    (
+        'Relaciones medidas',
+        'Se comparan correlaciones, R², rezagos y perfiles K-Means para separar economía, percepción, crimen y ciberseguridad.',
+        '#00b87a',
+    ),
+    (
+        'Lectura conjunta',
+        'Las señales convergen: salario, percepción y confianza suben con digitalización; fraude también, por eso aparece la capa de protección.',
+        '#c9922a',
+    ),
+]
+
+_PROTECTION_SIGNALS = [
+    ('r=+0.63', 'Fraude y digitalización', '#c9922a'),
+    ('8 estados', 'Brecha crítica de ciberseguridad', '#cf0a2c'),
+    ('r≈0', 'Relación entre IDDE y homicidio', '#00b4cc'),
+]
+
+_CAPABILITIES = [
+    (
+        'Conectividad',
+        'Expandir acceso y cobertura digital.',
+        'El dashboard separa cobertura, velocidad y banca digital: la calidad de conexión y la adopción financiera son las variables que más se traducen en salario y uso.',
+    ),
+    (
+        'Gobernanza',
+        'Incrementar confianza y adopción ciudadana.',
+        'La evidencia de percepción muestra que digitalizar no basta: la adopción depende de confianza ciudadana, servicios útiles y capacidad institucional visible.',
+    ),
+    (
+        'Ciberseguridad',
+        'Reducir vulnerabilidades y fraude digital.',
+        'Fraude es el delito con mayor asociación al IDDE (r=+0.63); por eso el crecimiento digital debe acompañarse de antifraude y monitoreo.',
+    ),
+    (
+        'Datos e inteligencia',
+        'Convertir infraestructura en decisiones públicas más efectivas.',
+        'Los clusters y el perfil por estado muestran que no todos necesitan lo mismo: los datos permiten priorizar brechas, riesgo y retorno esperado.',
+    ),
+]
 
 
-def _tier_card(code, name, color, states_ex, investment, returns, delay=''):
-    return dbc.Card([
-        dbc.CardBody([
-            html.Div([
-                html.Span(code, style={
+def _metric_card(metric, delay=''):
+    return dbc.Col(
+        dbc.Card([
+            dbc.CardBody([
+                html.P(metric['value'], style={
                     'fontFamily': 'DM Mono, monospace',
-                    'fontSize': '22px', 'fontWeight': '800', 'color': color,
-                    'marginRight': '8px',
+                    'fontSize': '30px',
+                    'fontWeight': '800',
+                    'color': metric['color'],
+                    'lineHeight': '1',
+                    'marginBottom': '12px',
                 }),
-                html.Span(name, style={
-                    'fontSize': '11px', 'fontWeight': '600', 'color': color,
-                    'textTransform': 'uppercase', 'letterSpacing': '0.06em',
+                html.P(metric['label'], style={
+                    'fontSize': '13px',
+                    'fontWeight': '700',
+                    'color': '#e8e8f0',
+                    'lineHeight': '1.35',
+                    'margin': '0',
                 }),
-            ], style={'marginBottom': '8px'}),
-            html.P(states_ex, style={'fontSize': '10px', 'color': '#5c5c74', 'marginBottom': '8px'}),
+            ], style={'padding': '22px 24px'}),
+        ], className=f"animate-in h-100 {metric['class']} {delay}".strip()),
+        md=4,
+    )
+
+
+def _conclusion_card(num, title, text, rationale, color, delay=''):
+    return dbc.Col(
+        html.Div([
+            html.Div(num, style={
+                'fontFamily': 'DM Mono, monospace',
+                'fontSize': '24px',
+                'fontWeight': '800',
+                'color': color,
+                'marginBottom': '18px',
+            }),
+            html.H3(title, style={
+                'fontSize': '17px',
+                'fontWeight': '700',
+                'color': '#e8e8f0',
+                'marginBottom': '9px',
+            }),
+            html.P(text, style={
+                'fontSize': '12.5px',
+                'color': '#b8b8cc',
+                'lineHeight': '1.65',
+                'marginBottom': '12px',
+            }),
+            html.P(rationale, style={
+                'fontSize': '11px',
+                'color': '#9090a8',
+                'lineHeight': '1.55',
+                'margin': '0',
+                'paddingTop': '10px',
+                'borderTop': f'1px solid {color}30',
+            }),
+        ], className=f'animate-in {delay}'.strip(), style={
+            'height': '100%',
+            'padding': '24px 22px',
+            'border': f'1px solid {color}33',
+            'borderTop': f'3px solid {color}',
+            'borderRadius': '8px',
+            'background': (
+                f'linear-gradient(180deg, {color}12 0%, '
+                'rgba(255,255,255,0.018) 56%, rgba(255,255,255,0.01) 100%)'
+            ),
+        }),
+        md=4,
+    )
+
+
+def _method_card(title, text, color, delay=''):
+    return dbc.Col(
+        html.Div([
+            html.Div(style={
+                'width': '24px',
+                'height': '2px',
+                'borderRadius': '2px',
+                'background': color,
+                'marginBottom': '10px',
+            }),
+            html.P(title, style={
+                'fontSize': '10px',
+                'fontWeight': '800',
+                'letterSpacing': '0.10em',
+                'textTransform': 'uppercase',
+                'color': color,
+                'marginBottom': '7px',
+            }),
+            html.P(text, style={
+                'fontSize': '11.5px',
+                'color': '#b8b8cc',
+                'lineHeight': '1.55',
+                'margin': '0',
+            }),
+        ], className=f'animate-in {delay}'.strip(), style={
+            'height': '100%',
+            'padding': '15px 16px',
+            'border': f'1px solid {color}26',
+            'background': f'linear-gradient(180deg, {color}10, rgba(255,255,255,0.012))',
+            'borderRadius': '8px',
+        }),
+        md=4,
+    )
+
+
+def _signal(value, label, color):
+    return html.Div([
+        html.Span(value, style={
+            'display': 'block',
+            'fontFamily': 'DM Mono, monospace',
+            'fontSize': '17px',
+            'fontWeight': '800',
+            'color': color,
+            'marginBottom': '4px',
+        }),
+        html.Span(label, style={
+            'display': 'block',
+            'fontSize': '10.5px',
+            'fontWeight': '600',
+            'color': '#c4c4d4',
+            'lineHeight': '1.35',
+        }),
+    ], style={
+        'padding': '13px 14px',
+        'borderLeft': f'2px solid {color}',
+        'background': f'{color}0f',
+        'borderRadius': '6px',
+        'height': '100%',
+    })
+
+
+def _capability(num, title, text, rationale):
+    return dbc.Col(
+        html.Div([
+            html.Span(f'{num:02d}', style={
+                'fontFamily': 'DM Mono, monospace',
+                'fontSize': '11px',
+                'fontWeight': '800',
+                'color': '#5c5c74',
+                'marginRight': '10px',
+            }),
             html.Div([
-                html.Span('Inversión prioritaria: ', style={
-                    'fontSize': '9px', 'fontWeight': '700', 'color': '#5c5c74',
-                    'textTransform': 'uppercase', 'letterSpacing': '0.07em',
+                html.P(title, style={
+                    'fontSize': '12px',
+                    'fontWeight': '700',
+                    'color': '#e8e8f0',
+                    'margin': '0 0 3px',
                 }),
-                html.Span(investment, style={'fontSize': '11px', 'color': color}),
-            ], style={'marginBottom': '4px'}),
-            html.Div([
-                html.Span('Retorno esperado: ', style={
-                    'fontSize': '9px', 'fontWeight': '700', 'color': '#5c5c74',
-                    'textTransform': 'uppercase', 'letterSpacing': '0.07em',
+                html.P(text, style={
+                    'fontSize': '10.5px',
+                    'color': '#9090a8',
+                    'lineHeight': '1.45',
+                    'marginBottom': '6px',
                 }),
-                html.Span(returns, style={'fontSize': '11px', 'color': '#00b87a'}),
+                html.P(rationale, style={
+                    'fontSize': '10px',
+                    'color': '#6f6f88',
+                    'lineHeight': '1.45',
+                    'margin': '0',
+                }),
             ]),
-        ], style={'padding': '14px 16px'}),
-    ], style={'border': f'1px solid {color}44', 'borderTop': f'2px solid {color}',
-              'borderRadius': '8px', 'background': '#16161f', 'height': '100%'},
-    className=f'animate-in {delay}')
+        ], style={
+            'display': 'flex',
+            'alignItems': 'flex-start',
+            'height': '100%',
+            'padding': '12px 8px',
+        }),
+        md=3,
+    )
 
 
 layout = html.Div([
     sidebar('/slide_cta'),
 
     html.Div([
-
-        # ── Page header ──────────────────────────────────────────────
         html.Div([
             html.Div(className='page-accent-line'),
-            html.H1('De los Datos a la Acción', className='page-title'),
+            html.H1('Conclusiones', className='page-title'),
             html.P(
-                'La evidencia está clara: la brecha digital es la mayor oportunidad de desarrollo '
-                'en México. Aquí está el camino de tres fases para convertirla en resultados.',
+                'La infraestructura digital genera valor económico y social',
                 className='page-subtitle',
             ),
             html.Div([
-                html.Span('32 estados · 4 perfiles', className='badge-gray me-2'),
-                html.Span('3 fases de acción', className='badge-cyan me-2'),
-                html.Span('Piloto en 90 días', className='badge-green'),
+                html.Span('Valor económico', className='badge-green me-2'),
+                html.Span('Confianza social', className='badge-cyan me-2'),
+                html.Span('Protección digital', className='badge-gold'),
             ]),
         ], className='page-header'),
 
-        # ── Scrollable body ──────────────────────────────────────────
         html.Div([
-
-            html.P(
-                'Los análisis de este dashboard demuestran que el IDDE predice salarios (R²=0.29), '
-                'confianza social (r=0.78) y percepción de seguridad. Los 4 perfiles de inversión '
-                'definen dónde invertir y qué tipo de retorno esperar. La siguiente pregunta no es '
-                '"¿vale la pena?" — los datos responden que sí. La pregunta es "¿por dónde empezamos?"',
-                className='page-context',
-            ),
-
-            # 3-step framework
-            html.Div([
-                html.Div(className='section-accent-cyan'),
-                html.H3('Hoja de ruta de 3 fases', className='section-block-title'),
-            ], className='section-block-header'),
-
             dbc.Row([
-                dbc.Col(_step_card(
-                    '01', 'Diagnóstico', 'Completado · Este dashboard',
-                    [
-                        '32 estados analizados con 134 variables del IDDE',
-                        '4 perfiles identificados con K-Means (k=4)',
-                        'Correlaciones IDDE → salarios, confianza y percepción validadas',
-                        'ROI proyectado por cluster disponible por estado',
-                    ],
-                    '#00b4cc', 'card-cyan',
-                ), md=4),
+                _metric_card(_VALUE_METRICS[0]),
+                _metric_card(_VALUE_METRICS[1], 'animate-in-delay-1'),
+                _metric_card(_VALUE_METRICS[2], 'animate-in-delay-2'),
+            ], className='g-3 mb-4'),
 
-                dbc.Col(_step_card(
-                    '02', 'Diseño de inversión', 'Semanas 1–8 · Selección y priorización',
-                    [
-                        'Selección de estados piloto por perfil de inversión (uno por cluster)',
-                        'Definición de indicadores clave: IDDE target, salario meta, confianza base',
-                        'Diseño de solución técnica por perfil',
-                        'Acuerdo de gobernanza y mecanismo de medición',
-                    ],
-                    '#c9922a', 'card-gold', 'animate-in-delay-1',
-                ), md=4),
-
-                dbc.Col(_step_card(
-                    '03', 'Piloto de 90 días', 'Mes 3–5 · Implementación y medición',
-                    [
-                        'Despliegue de infraestructura en 1–2 estados por perfil',
-                        'Medición mensual: IDDE, salarios formales, percepción ciudadana',
-                        'Ajuste de modelo y proyecciones con datos reales',
-                        'Informe ejecutivo para escalar a los demás estados del cluster',
-                    ],
-                    '#00b87a', 'card-success', 'animate-in-delay-2',
-                ), md=4),
-            ], className='g-3 mb-3'),
-
-            # Investment tiers
-            html.Div([
-                html.Div(className='section-accent-cyan'),
-                html.H3('4 perfiles · 4 estrategias de inversión', className='section-block-title'),
-                html.P(
-                    'Cada cluster tiene una estrategia diferenciada. No hay una solución única para los 32 estados.',
-                    className='section-block-subtitle'),
-            ], className='section-block-header'),
-
-            dbc.Row([
-                dbc.Col(_tier_card(
-                    'C0', 'Tradicionales', '#d15b4a',
-                    'Guerrero · Chiapas · Oaxaca + 4 estados',
-                    'Conectividad básica: fibra, cobertura móvil, banda ancha fija',
-                    'Máximo ROI por peso: mayor brecha → mayor retorno en salarios y visibilidad',
-                ), md=3),
-                dbc.Col(_tier_card(
-                    'C1', 'Inseguros-urbanos', '#3891c7',
-                    'CDMX · Estado de México · Jalisco + 3 estados',
-                    'Gobernanza digital y analítica avanzada',
-                    'Recuperación de confianza ciudadana e institucional',
-                    'animate-in-delay-1',
-                ), md=3),
-                dbc.Col(_tier_card(
-                    'C2', 'Desarrollados', '#2bb573',
-                    'Nuevo León · Baja California + 5 estados',
-                    'Infraestructura avanzada: 5G, nube, centros de datos',
-                    'Productividad y competitividad internacional',
-                    'animate-in-delay-2',
-                ), md=3),
-                dbc.Col(_tier_card(
-                    'C3', 'Violentos-conectados', '#e4982e',
-                    'Colima · Zacatecas + 2 estados',
-                    'Tecnología especializada: datos + instituciones',
-                    'Reducción de homicidios vía capacidad institucional',
-                    'animate-in-delay-3',
-                ), md=3),
-            ], className='g-3 mb-3'),
-
-            # Contact placeholder
-            html.Div([
-                html.Div(className='section-accent-cyan'),
-                html.H3('Siguiente paso', className='section-block-title'),
-            ], className='section-block-header'),
+            dbc.Card([
+                dbc.CardBody([
+                    html.Div([
+                        html.Div([
+                            html.Div(className='section-accent-cyan'),
+                            html.H3('Cómo se llega a estas conclusiones',
+                                    className='section-block-title'),
+                        ]),
+                        html.P(
+                            'El dashboard cruza indicadores de digitalización con resultados sociales, '
+                            'económicos y de seguridad para identificar patrones consistentes, no casos aislados.',
+                            style={
+                                'fontSize': '12.5px',
+                                'color': '#9a9ab5',
+                                'lineHeight': '1.55',
+                                'margin': '0',
+                                'maxWidth': '620px',
+                            },
+                        ),
+                    ], style={
+                        'display': 'flex',
+                        'justifyContent': 'space-between',
+                        'gap': '18px',
+                        'alignItems': 'flex-end',
+                        'marginBottom': '14px',
+                    }),
+                    dbc.Row([
+                        _method_card(*_METHOD_STEPS[0]),
+                        _method_card(*_METHOD_STEPS[1], 'animate-in-delay-1'),
+                        _method_card(*_METHOD_STEPS[2], 'animate-in-delay-2'),
+                    ], className='g-2'),
+                ], style={'padding': '20px 22px'}),
+            ], className='card-clean animate-in mb-4'),
 
             dbc.Card([
                 dbc.CardBody([
                     dbc.Row([
                         dbc.Col([
-                            html.P('¿Tu estado en qué perfil está?', style={
-                                'fontWeight': '700', 'fontSize': '14px', 'color': '#e8e8f0',
-                                'marginBottom': '8px',
+                            html.P('El hallazgo principal', style={
+                                'fontSize': '10px',
+                                'fontWeight': '800',
+                                'letterSpacing': '0.12em',
+                                'textTransform': 'uppercase',
+                                'color': '#00d98f',
+                                'marginBottom': '12px',
                             }),
-                            html.P(
-                                'Usa el módulo "Perfil de Estado" de este dashboard para ver tu diagnóstico '
-                                'ejecutivo: cluster de inversión, IDDE actual, brecha al nivel C2 '
-                                'y proyección de retorno personalizada.',
-                                style={'fontSize': '12px', 'color': '#b8b8cc', 'lineHeight': '1.6',
-                                       'marginBottom': '12px'},
-                            ),
-                            html.A(
-                                '→ Ver perfil por estado',
-                                href='/slide_perfil_estado',
+                            html.H2(
+                                'Digitalizar crea crecimiento, confianza y seguridad percibida.',
                                 style={
-                                    'color': '#00b4cc', 'fontSize': '12px', 'fontWeight': '600',
-                                    'textDecoration': 'none',
-                                    'border': '1px solid #00b4cc44',
-                                    'padding': '6px 14px', 'borderRadius': '6px',
-                                    'display': 'inline-block',
+                                    'fontSize': '28px',
+                                    'fontWeight': '700',
+                                    'color': '#e8e8f0',
+                                    'lineHeight': '1.18',
+                                    'marginBottom': '0',
                                 },
                             ),
-                        ], md=8),
+                        ], md=5),
                         dbc.Col([
-                            html.Div([
-                                html.P('Datos utilizados', style={
-                                    'fontSize': '9px', 'fontWeight': '700', 'color': '#5c5c74',
-                                    'textTransform': 'uppercase', 'letterSpacing': '0.10em',
-                                    'marginBottom': '8px',
-                                }),
-                                html.Ul([
-                                    html.Li('IDDE 2022–2025 (IFT)', style={'fontSize': '10px', 'color': '#5c5c74'}),
-                                    html.Li('SESNSP — Incidencia delictiva 2015–2025', style={'fontSize': '10px', 'color': '#5c5c74'}),
-                                    html.Li('ENVIPE — Percepción y confianza ciudadana', style={'fontSize': '10px', 'color': '#5c5c74'}),
-                                    html.Li('ENOE — Mercado laboral y salarios', style={'fontSize': '10px', 'color': '#5c5c74'}),
-                                    html.Li('DENUE — Directorio de unidades económicas', style={'fontSize': '10px', 'color': '#5c5c74'}),
-                                ], style={'paddingLeft': '14px', 'margin': '0'}),
-                            ]),
-                        ], md=4),
-                    ]),
-                ], style={'padding': '20px 24px'}),
-            ], className='card-clean animate-in', style={'marginBottom': '32px'}),
+                            html.P(
+                                'La infraestructura digital no solo mejora la conectividad: '
+                                'también incrementa ingresos, fortalece la confianza ciudadana '
+                                'y mejora la percepción de seguridad.',
+                                style={
+                                    'fontSize': '15px',
+                                    'color': '#c4c4d4',
+                                    'lineHeight': '1.68',
+                                    'marginBottom': '14px',
+                                },
+                            ),
+                            html.P(
+                                'Los beneficios más importantes aparecen después de dos años, '
+                                'por lo que la inversión debe evaluarse con visión de mediano plazo.',
+                                style={
+                                    'fontSize': '15px',
+                                    'fontWeight': '600',
+                                    'color': '#e8e8f0',
+                                    'lineHeight': '1.65',
+                                    'margin': '0',
+                                },
+                            ),
+                        ], md=7),
+                    ], className='align-items-center'),
+                ], style={'padding': '32px'}),
+            ], className='card-clean animate-in mb-4', style={
+                'borderLeft': '4px solid #00b87a66',
+            }),
 
+            dbc.Row([
+                _conclusion_card(*_CONCLUSIONS[0]),
+                _conclusion_card(*_CONCLUSIONS[1], 'animate-in-delay-1'),
+                _conclusion_card(*_CONCLUSIONS[2], 'animate-in-delay-2'),
+            ], className='g-3 mb-4'),
+
+            dbc.Card([
+                dbc.CardBody([
+                    dbc.Row([
+                        dbc.Col([
+                            html.Div(className='section-accent-cyan'),
+                            html.H3('Digitalizar sí, pero con protección',
+                                    className='section-block-title'),
+                            html.P(
+                                'Más conectividad, banca digital y comercio electrónico generan crecimiento, '
+                                'pero también amplían la superficie de ataque. La siguiente etapa no es solo '
+                                'desplegar más tecnología: es construir capacidades de ciberseguridad que '
+                                'permitan sostener ese crecimiento.',
+                                style={
+                                    'fontSize': '12.5px',
+                                    'color': '#b8b8cc',
+                                    'lineHeight': '1.65',
+                                    'margin': '0',
+                                },
+                            ),
+                        ], md=5),
+                        dbc.Col([
+                            dbc.Row([
+                                dbc.Col(_signal(*_PROTECTION_SIGNALS[0]), md=4),
+                                dbc.Col(_signal(*_PROTECTION_SIGNALS[1]), md=4),
+                                dbc.Col(_signal(*_PROTECTION_SIGNALS[2]), md=4),
+                            ], className='g-2 mb-3'),
+                            dbc.Row([
+                                _capability(i + 1, title, text, rationale)
+                                for i, (title, text, rationale) in enumerate(_CAPABILITIES)
+                            ], className='g-1'),
+                        ], md=7),
+                    ], className='g-3 align-items-stretch'),
+                ], style={'padding': '24px 26px'}),
+            ], className='card-clean animate-in mb-4'),
         ], className='main-scroll'),
-
     ], className='main-content'),
 ], className='page-root')

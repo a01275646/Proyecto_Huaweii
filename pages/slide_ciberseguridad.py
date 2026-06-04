@@ -95,6 +95,29 @@ layout = html.Div([
                     'animate-in-delay-4'), md=3),
             ], className='g-3 mb-3'),
 
+            html.Div([
+                html.Div(className='section-accent-cyan'),
+                html.H3('Fraude × digitalización: la relación directa',
+                        className='section-block-title'),
+                html.P(
+                    'Cada punto representa un estado. La línea recta muestra la tendencia promedio: '
+                    'a mayor IDDE, mayor tasa de fraude reportado. Esta relación ayuda a explicar por qué '
+                    'la ciberseguridad debe crecer al mismo ritmo que la adopción digital.',
+                    className='section-block-subtitle'),
+            ], className='section-block-header'),
+
+            dbc.Row([
+                dbc.Col(
+                    _chart_card(
+                        'Tasa de fraude vs IDDE 2025',
+                        'sciber-fraud-idde',
+                        desc='La línea de regresión resume la asociación entre infraestructura digital y fraude reportado por 100 mil habitantes.',
+                        height='390px',
+                    ),
+                    md=12,
+                ),
+            ], className='g-3 mb-3'),
+
             # Main charts
             html.Div([
                 html.Div(className='section-accent-cyan'),
@@ -189,12 +212,13 @@ layout = html.Div([
 @dash.callback(
     dash.Output('sciber-quadrant',    'figure'),
     dash.Output('sciber-gap-bars',    'figure'),
+    dash.Output('sciber-fraud-idde',  'figure'),
     dash.Output('sciber-crime-types', 'figure'),
     dash.Input('sciber-init', 'n_intervals'),
 )
 def load_charts(_):
     from pages.get_figures.get_figures_ciberseguridad import (
-        fig_fraud_quadrant, fig_cyber_gap_bars,
+        fig_fraud_quadrant, fig_cyber_gap_bars, fig_fraud_idde_scatter_cyber,
     )
     from pages.get_figures.get_figures_nuevos_evidencia import (
         fig_crime_type_heterogeneity,
@@ -210,5 +234,6 @@ def load_charts(_):
     return (
         _safe(fig_fraud_quadrant),
         _safe(fig_cyber_gap_bars),
+        _safe(fig_fraud_idde_scatter_cyber),
         _safe(fig_crime_type_heterogeneity),
     )
